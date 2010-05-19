@@ -1,0 +1,64 @@
+#+title: Dan Davison
+
+
+
+1. Name + Job Title
+   Dan Davison
+   Postdoctoral Researcher
+
+2. Photo
+   http://www.stats.ox.ac.uk/~davison/dan.jpg
+
+3. Research summary -  100-300 words describing your individual work
+
+   My central research interest is the use of genetic data to learn about
+   population history and 'speciation'. I am currently developing methods
+   to learn about patterns of ancestry within the British Isles from the
+   data collected by the People of the British Isles project.  In
+   addition, I am developing new methods for using linked variation to
+   fit non-equilibrium models of population history and for population
+   structure analyses of very large data sets being generated in the
+   course of genome-wide association studies. I distribute software that
+   I develop for others to use, e.g.
+
+   http://www.stats.ox.ac.uk/~davison/software/shellfish/shellfish.php
+
+4. Publication List
+
+   - D Davison, J Pritchard and G Coop (2009) An approximate likelihood
+     for genetic data under a model with recombination and population
+     splitting. *Theoretical Population Biology* 75(4):331-345
+   - S Myles, D Davison, J Barrett, M Stoneking and N Timpson (2008)
+     Worldwide population differentiation at disease-associated SNPs *BMC
+     Medical Genomics* 1(1):22
+   - Wellcome Trust Case Control Consortium (2007) Genome-wide
+     association study of 14,000 cases of seven common diseases and
+     3,000 shared controls. *Nature* 447:661-678
+
+5. Research Area(s)
+
+   Population genetics, Statistical genetics, Population structure and
+   history, 'Speciation' and 'Species-level' systematics, Association
+   mapping
+
+6. Keywords
+
+   Population genetics, Statistical genetics, Population structure and
+   history, 'Speciation' and 'Species-level' systematics, Association
+   mapping
+
+7. Contact Details (wtchg ones not stats)
+   01865 287620
+   davison@well.ox.ac.uk
+
+8. Images (cool plots if you want)
+* config							   :noexport:
+#+html: <?php $visitorlog_file = "index.visitors" ; $visitorlog_mailto = array(dan => "davison@stats.ox.ac.uk") ;
+#+include: ~/src/common/visitorlog.php html
+#+html: ?>
+   
+#+setupfile: "~/src/common/org-header.org"
+#+style: <link rel="stylesheet" type="text/css" href="dan.css" />
+
+# (setq org-export-html-extension "php")
+

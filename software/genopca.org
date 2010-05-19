@@ -1,0 +1,167 @@
+#+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    author:nil creator:nil timestamp:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="dan.css" />
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+TITLE:      genopca: PCA for very large SNP genotype data sets
+#+AUTHOR:     Dan Davison
+#+EMAIL:      davison@stats.ox.ac.uk
+#+LANGUAGE:   en
+
+* Introduction
+  This document describes a collection of programs that can be used to
+  perform PCA on a large data set of SNP genotypes. One way to do PCA
+  on n individuals is to compute the n x n covariance matrix, and then
+  compute the eigenvectors of that matrix. That's how this software
+  does it. It uses the standard linear algebra packages BLAS and
+  LAPACK, which have been carefully designed for computational
+  efficiency. The procedure implemented is very similar to that
+  implemented by Nick Patterson's [[http://genepath.med.harvard.edu/~reich/Software.htm][eigensoft]] package. The main
+  difference is that my programs permit the covariance matrix to be
+  computed in parallel, permitting PCA to be carried out rapidly on a
+  computing cluster, even for very large data sets.
+
+* Download, unpack and compile my code
+  
+#+begin_src shell-script
+# download it
+$ wget http://www.stats.ox.ac.uk/~davison/software/genopca/genopca-genecluster.tgz
+# unpack it
+$ tar -xzf genopca-genecluster.tgz
+# go into the source directory and compile all the C executables
+$ cd genopca/src/
+$ make all
+#+end_src shell-script
+
+That should have put all the executables in the top-level directory.
+
+* Short version
+The data format is pretty simple: one line per SNP; 0,1,2 for the 3
+genotypes and 9 for missing. No spaces. Given a data file called
+data.geno, the following steps perform a PCA. This example if for a
+data set of 8 individuals and 4 SNPs.
+
+#+begin_src shell-script
+## compute allele frequencies
+sstat -n 8 < data.geno > all.freq
+## compute the covariance matrix
+mkdir genocov-output
+split-genotypes -i -d split-data < all.geno
+genocov -a 1 -b 8 -c 1 -d 8 -N 8 -L 4 -l 4 -i split-data -f all.freq -o genocov-output
+cat genocov-output/* > all.cov
+## compute the eigenvectors
+mkdir coveigen-output
+coveigen -n 8 -v 3 -g all.cov -o coveigen-output
+## compute the SNP loadings
+mkdir snpload-output
+snpload -a 1 -b 4 -N 8 -v 3 -L 4 -g all.geno -e coveigen-output/evecs -f all.freq -o snpload-output
+#+end_src shell-script
+
+* Make the covariance matrix
+** Make the allele frequency file
+   genocov makes the covariance matrix, but first make a file of allele frequencies which genocov will use:
+#+begin_src shell-script
+sstat -n 8 < all.geno > all.freq
+#+end_src shell-script
+
+** Split the data file into different files for each individual
+
+   The point of this stage is that in principle you can compute the
+full covariance matrix by computing the submatrices in parallel
+(e.g. running different simultaneous jobs on different nodes) and then
+combine them. I'm not going to demonstrate that now; we're just going
+to compute the whole covariance matrix in one go. But you still have
+to split the data up first:
+
+#+begin_src shell-script
+split-genotypes -i -d split-data < all.geno
+#+end_src shell-script
+
+** Run genocov
+   genocov outputs various files into a directory. So make that
+   directory first and then run genocov. The a,b,c,d arguments are
+   specifying a submatrix of the whole matrix (start row, end row,
+   start column, end column). But since we're not doing the submatrix
+   thing they're just 1 and n (i.e. number of individs). Other
+   arguments are -N (num individs), -L (number of loci in the data
+   file), -i (name of split data directory), -f (frequencie file), -o
+   (output directory)
+
+   You can at this stage also supply an extra argument -S which is the
+   name of a file specifying SNPs to exclude when computing the
+   covariance matrix. That file would be a list of integers, one per
+   line, where each integer is the index of a SNP to be excluded
+   (indexing from 1, not 0), and the indexes are in increasing
+   order. i.e. the file could look like
+
+#+begin_src shell-script
+2
+4
+9
+#+end_src shell-script
+
+The final argument which I didn't mention above is -l. This is the
+   number of loci used to compute the covariance matrix. If you used
+   the -S option to exclude SNPs then it will be the -L number minus
+   the number of SNPs listed in the exclude file. If you didn't then
+   it will be the same as the -L number.
+
+#+begin_src shell-script
+$ mkdir genocov-output
+$ genocov -a 1 -b 8 -c 1 -d 8 -N 8 -L 4 -l 4 -i split-data -f all.freq -o genocov-output
+$ cat genocov-output/* > all.cov
+$ cat all.cov
+0.285714 0.285714 -0.857143 0.285714 0.285714 0.285714 -0.857143 0.285714 
+0.285714 -0.857143 0.285714 0.285714 0.285714 -0.857143 0.285714 
+2.571429 -0.857143 -0.857143 -0.857143 2.571429 -0.857143 
+0.285714 0.285714 0.285714 -0.857143 0.285714 
+0.285714 0.285714 -0.857143 0.285714 
+0.285714 -0.857143 0.285714 
+2.571429 -0.857143 
+0.285714 
+#+end_src shell-script
+
+** Do the eigenvector decomposition
+   Arguments are 
+n: sample size
+v: number of eigenvectors to compute
+g: location of covariance matrix file
+o: output directory
+
+Don't make v too small, as to start off with you'll find (when you
+compute the SNP loadings) that the leading eigenvectors are just
+regions of high LD. I don't think outputting  loads of eigenvectors
+slows things down much, so I'd say maybe try v = 100 or something.
+
+#+begin_src shell-script
+$ mkdir coveigen-output
+$ coveigen -n 8 -v 3 -g all.cov -o coveigen-output
+Wed 08 Oct 14:01:34   cov-eigen
+reading column 0 of 8
+Wed 08 Oct 14:01:34 doing eigendecomposition
+LWORK = 328
+LIWORK = 80
+Wed 08 Oct 14:01:34	writing evals to file coveigen-output/evals
+Wed 08 Oct 14:01:34	writing evecs to file coveigen-output/evecs
+Wed 08 Oct 14:01:34	done!
+
+$ cat coveigen-output/evecs 
+-0.204124 -0.204124 0.612372 -0.204124 -0.204124 -0.204124 0.612372 -0.204124 
+0.809893 -0.486789 0.158296 -0.044752 -0.020457 -0.025706 -0.158296 -0.232189 
+0.365895 0.239669 -0.563132 -0.234409 -0.234441 -0.234471 0.563132 0.097757 
+#+end_src shell-script
+
+And there are the first three eigenvectors.
+
+* Compute the 'SNP loadings'
+The top eigenvectors might reflect SNPs that are correlated as a
+result of genome-wide population structure, or they might reflect SNPs
+that are correlated because of local reasons such as tight linkage, or
+inversions.  In order to find out which eigenvector is telling you
+what, it's helpful to plot the contribution of each SNP to each
+eigenvector, along the chromosome. The program snpload does that, and
+needs the original data, and the eigenvectors, as input:
+
+#+begin_src shell-script
+mkdir snpload-output
+snpload -a 1 -b 4 -N 8 -v 3 -L 4 -g all.geno -e coveigen-output/evecs -f all.freq -o snpload-output
+#+end_src shell-script

@@ -1,0 +1,42 @@
+#+title:Publications
+
+
+* Population genetics
+- D Davison, J Pritchard and G Coop (2009) An approximate likelihood
+  for genetic data under a model with recombination and population
+  splitting. *Theoretical Population Biology* 75(4):331-345
+* Human genetics
+- S Myles, D Davison, J Barrett, M Stoneking and N Timpson (2008)
+  Worldwide population differentiation at disease-associated SNPs *BMC
+  Medical Genomics* 1(1):22
+- Wellcome Trust Case Control Consortium (2007) Genome-wide
+  association study of 14,000 cases of seven common diseases and
+  3,000 shared controls. *Nature* 447:661-678
+* Statistical data analysis
+- H Dugdale, T Burke, D Davison, S Baker, C Bueshing, S Ellwood, C
+  Newman, D Macdonald (2009) Application of genetic techniques to
+  validate female teat size as a reliable indicator of annual
+  breeding success in a medium-sized carnivore (submitted)
+- A Young, H Barnes, D Davison, S Neubauer and J Schneider (2009)
+  Fast Left Ventricular Mass and Volume in Mice with
+  Three-Dimensional Guide-Point Modeling. *Journal of Magnetic
+  Resonance Imagery* 30:514-520
+* Ornithology
+- Salaman, PGW, Donegan TM, Davison DE & Ochoa JM. 2007. Birds of
+  Serranía de los Churumbelos, their conservation and elevational
+  distribution. *Conservación Colombiana* 3: 29-58.
+* Ph.D
+- [[file:pub/dsrtn.pdf][My Ph.D. dissertation]] : "Inferences about the evolutionary history
+  of geographically structured populations: the intersection of
+  population genetics, biogeography and systematics"
+
+* config							   :noexport:
+#+html: <?php $visitorlog_file = "index.visitors" ; $visitorlog_mailto = array(dan => "davison@stats.ox.ac.uk") ;
+#+include: ~/src/common/visitorlog.php html
+#+html: ?>
+
+#+setupfile: "~/src/common/org-header.org"
+#+options: toc:nil
+#+style: <link rel="stylesheet" type="text/css" href="dan.css" />
+
+

@@ -1,0 +1,102 @@
+#+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    author:nil creator:nil timestamp:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="dan.css" />
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+TITLE:      =lines= and =slice=
+#+AUTHOR:     Dan Davison
+#+EMAIL:      davison@stats.ox.ac.uk
+#+LANGUAGE:   en
+
+* lines [ [[file:software/lines.tgz][download]] ]
+  'lines' is a tool for extracting certain lines from a (large) data
+  file. It takes as input a file containing the numbers of the lines
+  which you wish to extract. Those line numbers may not necessarily
+  be in increasing order. If that is the case, then simple solutions
+  in sed/perl etc will be very inefficient as they will make many
+  passes over the file.  R users might read the data into R and then
+  use R's array subsetting facilities. But depending on the size of
+  the file and the amount of RAM available, that can be frustrating /
+  impossible. 'lines' performs this task efficiently (with a single
+  pass through the file), by storing the offsets of each new-line
+  that it passes, and jumping back to them if necessary. It is
+  written in C. To compile, uncompress archive, extract files, enter
+  directory 'lines' and type 'make'.
+** Example usage
+#+begin_src shell-script
+## Desired line numbers are held in the file `wantlines'
+$ cat wantlines
+100
+1
+50
+75
+2
+25
+17
+## Here's the first few lines of the file from which we're requesting the lines.
+$ head file
+line 001
+line 002
+line 003
+line 004
+line 005
+line 006
+line 007
+line 008
+line 009
+line 010
+## use `lines' to print out the lines
+$ lines -f wantlines < file 
+line 100
+line 001
+line 050
+line 075
+line 002
+line 025
+line 017
+## But NB you can't use a pipe unless the line numbers are increasing! (because you can't use stdio 'seek' with a pipe)
+$ cat file | lines -f wantlines
+line 100
+fseek error (Did you use a pipe and ask for non-monotonically increasing lines? You can't use a pipe in that case.) :
+#+end_src shell-script
+ 
+#+html: <?php $visitorlog_file = "software.visitors" ; $visitorlog_mailto = array(dan => "davison@stats.ox.ac.uk") ;
+#+include: ~/src/common/visitorlog.php html
+#+html: ?>
+* slice [ [[file:software/slice][download]] ]
+  This tool slices up tabular data. The line and column numbers that
+  you want are specified in two separate files; if either is omitted
+  then all lines/columns are printed out. The line- numbers must be
+  in increasing order. See 'lines' below if they're not. The column
+  delimiter is specified with the '-d' flag (defaults to a single
+  space character). The '-v' flag inverts the sense of matching
+  (i.e. rows and columns are printed out if they don't occur in the
+  files). 'slice' is written in perl. Under linux and Mac OSX, just
+  download it and make sure it's executable.
+** Example usage
+#+begin_src shell-script
+$ cat data ## some tabular data
+11 12 13
+21 22 23
+31 32 33
+41 42 43
+$ cat line-nums ## a file containing desired line numbers, one per line
+1
+3
+$ ./slice -l line-nums < data ## extract the lines
+11 12 13
+31 32 33
+$ cat col-nums ## desired column numbers
+2
+3
+$ ./slice -c col-nums < data ## extract the columns
+12 13
+22 23
+32 33
+42 43
+$ ./slice -l line-nums -c col-nums < data ## extract their intersection
+12 13
+32 33
+$ ./slice -v -l line-nums -c col-nums < data ## extract everything not in their union
+21
+41
+#+end_src shell-script

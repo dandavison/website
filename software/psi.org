@@ -1,0 +1,18 @@
+#+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    author:nil creator:nil timestamp:nil
+#+STYLE: <link rel="stylesheet" type="text/css" href="../dan.css" />
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+TITLE:      Dan Davison
+#+AUTHOR:     Dan Davison
+#+EMAIL:      davison@stats.ox.ac.uk
+#+LANGUAGE:   en
+
+* psi: parallel structure inference [contact me if you want to use this]
+  This software fits the 'admixture model' described by Pritchard et
+  al. (2000) Genetics (2):945-959, to SNP genotype data. The model may
+  be fitted using either MCMC (as described by the original authors),
+  Variational Bayes (unpublished), or the EM algorithm. The EM fit
+  (and potentially the others) may be carried out in parallel on a
+  compute cluster with some version of MPI installed. In that case the
+  speed-up is roughly linear in the number of processors allocated to
+  the task.

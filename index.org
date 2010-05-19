@@ -1,0 +1,54 @@
+#+title:Dan Davison
+
+[[file:dan.jpg]]
+
+* 
+I'm a postdoc in [[http://www.stats.ox.ac.uk/people/academic_staff/peter_donnelly][Peter Donnelly]]'s group, in the Statistics Department
+at Oxford University. I use population genetic data to study
+population structure, speciation and 'species-level' systematics. I'm
+currently working on analyses of large data sets of SNP genotypes of
+humans in the UK and continental Europe. I did my Ph.D. in the
+Committee on Evolutionary Biology at the University of Chicago,
+working in [[http://pritch.bsd.uchicago.edu][Jonathan Pritchard]]'s group and in the Bird Division of the
+Field Museum of Natural History in Chicago with [[http://fm1.fieldmuseum.org/aa/staff_page.cgi?staff=hackett][Shannon Hackett]].
+
+* Selected Publications
+   - D Davison, J Pritchard and G Coop (2009) An approximate likelihood
+     for genetic data under a model with recombination and population
+     splitting. *Theoretical Population Biology* 75(4):331-345
+   - S Myles, D Davison, J Barrett, M Stoneking and N Timpson (2008)
+     Worldwide population differentiation at disease-associated SNPs *BMC
+     Medical Genomics* 1(1):22
+   - Wellcome Trust Case Control Consortium (2007) Genome-wide
+     association study of 14,000 cases of seven common diseases and
+     3,000 shared controls. *Nature* 447:661-678
+*** [[file:publications.org][All publications]]
+
+* Population genetics software
+** [[file:software/shellfish/shellfish.org][shellfish]]
+   PCA for very large data sets of SNP genotypes. Computations are
+   automatically performed in parallel on a computing cluster, and on
+   a single multi-processor machine.
+** [[./software/psi.org][psi]]
+   Parallel implementation of the Pritchard et al. (2000) "Admixture Model" (EM, MCMC or VB)
+* Other software
+** [[./software/lines-and-slice.org][lines and slice]]
+   Rapid extraction of lines and columns from tabular text
+   files. Especially useful for large files, such as genome-wide
+   genotype data.
+** [[http://orgmode.org/worg/org-tutorials/org-R/org-R.php][org-R]]
+   An interface for using =R= code within emacs org-mode.
+* Etc
+** [[file:plants/floras/index.php][plant photos]]
+   Taxonomically organised flower photographs
+  
+* config							   :noexport:
+#+html: <?php $visitorlog_file = "index.visitors" ; $visitorlog_mailto = array(dan => "davison@stats.ox.ac.uk") ;
+#+include: ~/src/common/visitorlog.php html
+#+html: ?>
+   
+#+setupfile: "~/src/common/org-header.org"
+#+style: <link rel="stylesheet" type="text/css" href="dan.css" />
+
+# (setq org-export-html-extension "php")
+

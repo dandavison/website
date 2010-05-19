@@ -1,0 +1,15 @@
+#+title: Dan's software
+#+startup: content
+
+All my software is distributed as source code, and should be
+straightforward to use, especially on linux / OS X. Please contact
+me if you download any of this software. Seriously.
+
+* population genetics
+** [[./software/psi.org][psi]]
+   Parallel EM approach to fitting the Pritchard et al. (2000) "Admixture Model"
+* data processing
+** [[./software/lines-and-slice.org][lines and slice]]
+   Rapid extraction of lines and columns from tabular text
+   files. Especially useful for large files, such as genome-wide
+   genotype data.
