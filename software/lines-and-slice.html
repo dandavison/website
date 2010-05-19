@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Extracting lines and columns from tabular text files</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2008-09-05 17:15:50 BST"/>
+<meta name="author" content="Dan"/>
+<style type="text/css">
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+</style><link rel=stylesheet
+                       href="style.css"
+                       type="text/css">
+</head><body>
+<h1 class="title">Extracting lines and columns from tabular text files</h1>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">lines [ <a href="software/lines.tgz">download</a> ]</h2>
+<div id="text-1">
+
+<p>'lines' is a tool for extracting certain lines from a (large) data
+file. It takes as input a file containing the numbers of the lines
+which you wish to extract. Those line numbers may not necessarily
+be in increasing order. If that is the case, then simple solutions
+in sed/perl etc will be very inefficient as they will make many
+passes over the file.  R users might read the data into R and then
+use R's array subsetting facilities. But depending on the size of
+the file and the amount of RAM available, that can be frustrating /
+impossible. 'lines' performs this task efficiently (with a single
+pass through the file), by storing the offsets of each new-line
+that it passes, and jumping back to them if necessary. It is
+written in C. To compile, uncompress archive, extract files, enter
+directory 'lines' and type 'make'.
+</p>
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1">Example usage</h3>
+<div id="text-1.1">
+
+
+<pre class="src src-shell-script"><span style="color: #cd0000;">## </span><span style="color: #cd0000;">Desired line numbers are held in the file `wantlines'
+</span>$ cat wantlines
+100
+1
+50
+75
+2
+25
+17
+<span style="color: #cd0000;">## </span><span style="color: #cd0000;">Here's the first few lines of the file from which we're requesting the lines.
+</span>$ head file
+line 001
+line 002
+line 003
+line 004
+line 005
+line 006
+line 007
+line 008
+line 009
+line 010
+<span style="color: #cd0000;">## </span><span style="color: #cd0000;">use `lines' to print out the lines
+</span>$ lines -f wantlines &lt; file 
+line 100
+line 001
+line 050
+line 075
+line 002
+line 025
+line 017
+<span style="color: #cd0000;">## </span><span style="color: #cd0000;">But NB you can't use a pipe unless the line numbers are increasing! (because you can't use stdio 'seek' with a pipe)
+</span>$ cat file | lines -f wantlines
+line 100
+fseek error (Did you use a pipe and ask for non-monotonically increasing lines? You can<span style="color: #00cd00;">'t use a pipe in that case.) :
+</span></pre>
+
+
+
+
+<?php $visitorlog_file = "software.visitors" ; $visitorlog_mailto = array(dan => "davison@stats.ox.ac.uk") ;
+// Insert this code into web page to log all visitors (excluding certain search engines and other specified IPs to ignore)
+// The following variables must be defined:
+//     $visitorlog_mailto (array of email addresses for notification of genuine hits)
+//     $visitorlog_msg (string to add to email message)
+//     $visitorlog_file (name of log file)
+
+
+// 74.6.17.190 llf520160.crawl.yahoo.net
+// 67.195.37.125 llf320013.crawl.yahoo.net
+// 65.214.45.136 crawler4027.ask.com
+// 66.249.65.196 crawl-66-249-65-196.googlebot.com
+// 65.55.104.208 msnbot-65-55-104-208.search.msn.com
+// 208.111.154.15 crawl1.nat.svl.searchme.com
+$engines = array("yahoo" => "crawl\.yahoo\.", "ask" => "crawler.*\.ask\.", "google" => "crawl.*\.googlebot\.", "msn" => "msnbot.*\.search\.msn\.", "searchme" => "\.searchme\.") ;
+
+// why is llf520160.crawl.yahoo.net getting through?
+
+$ignore_ips = array(haywards_cottage => "80.89.87.192") ;
+
+$ip=$_SERVER['REMOTE_ADDR'] ;
+$host = gethostbyaddr($ip) ;
+$currenturl = $_SERVER["HTTP_HOST"] . $_SERVER["REQUEST_URI"] ; 
+
+$genuine = true ;
+foreach($engines as $regex) {
+    if(ereg($regex, $host)) { $genuine = false ; }
+}
+foreach($ignore_ips as $ignore_ip) {
+    if($ip == $ignore_ip) { $genuine = false ; }
+}
+echo "<br><br><br><br><br><br><br><br><br><br><br><br>" ;
+// $visitorlog_num = system("wc -l <".$visitorlog_file." 2> /dev/null") ;
+// passthru("wc -l <".$visitorlog_file." 2> /dev/null", &$visitorlog_num) ; both these alternatives seem to echo the output as well as return it.
+if(! $visitorlog_num) { $visitorlog_num = 0 ; }
+if( $genuine ) {
+    $visitorlog_num = $visitorlog_num + 1 ;
+    $time = date("Y-m-d-H:i") ;
+    $msg = "Well done! On " . $time . " someone with IP address " . $ip . " visited " . $currenturl . ". That IP address comes up as " . $host . "\nNumber of visitors so far is " . $visitorlog_num ;
+    $msg = $msg . "\n" . $visitorlog_msg ;
+    foreach($visitorlog_mailto as $addr) { mail($addr,"website hit!", $msg) ; }
+    $fh = fopen($visitorlog_file, "a") ;
+    fwrite($fh, $time." ".$ip." ".$host."\n") ;
+    fclose($fh) ;
+ }
+// echo "visitor number ".$visitorlog_num."<br>" ;
+?>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">slice [ <a href="software/slice">download</a> ]</h2>
+<div id="text-2">
+
+<p>This tool slices up tabular data. The line and column numbers that
+you want are specified in two separate files; if either is omitted
+then all lines/columns are printed out. The line- numbers must be
+in increasing order. See 'lines' below if they're not. The column
+delimiter is specified with the '-d' flag (defaults to a single
+space character). The '-v' flag inverts the sense of matching
+(i.e. rows and columns are printed out if they don't occur in the
+files). 'slice' is written in perl. Under linux and Mac OSX, just
+download it and make sure it's executable.
+</p>
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1">Example usage</h3>
+<div id="text-2.1">
+
+
+<pre class="src src-shell-script">$ cat data <span style="color: #cd0000;">## </span><span style="color: #cd0000;">some tabular data
+</span>11 12 13
+21 22 23
+31 32 33
+41 42 43
+$ cat line-nums <span style="color: #cd0000;">## </span><span style="color: #cd0000;">a file containing desired line numbers, one per line
+</span>1
+3
+$ ./slice -l line-nums &lt; data <span style="color: #cd0000;">## </span><span style="color: #cd0000;">extract the lines
+</span>11 12 13
+31 32 33
+$ cat col-nums <span style="color: #cd0000;">## </span><span style="color: #cd0000;">desired column numbers
+</span>2
+3
+$ ./slice -c col-nums &lt; data <span style="color: #cd0000;">## </span><span style="color: #cd0000;">extract the columns
+</span>12 13
+22 23
+32 33
+42 43
+$ ./slice -l line-nums -c col-nums &lt; data <span style="color: #cd0000;">## </span><span style="color: #cd0000;">extract their intersection
+</span>12 13
+32 33
+$ ./slice -v -l line-nums -c col-nums &lt; data <span style="color: #cd0000;">## </span><span style="color: #cd0000;">extract everything not in their union
+</span>21
+41
+</pre>
+
+</div>
+</div>
+</div>
+</body>
+</html>

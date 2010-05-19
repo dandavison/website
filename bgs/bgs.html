@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>BGS</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2009-06-01 14:48:16 EDT"/>
+<meta name="author" content="Dan Davison"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="dan.css" />
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">BGS</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">Is pi predicted by recomb and BGS? </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">Is pi predicted by recomb and BGS? </h2>
+<div class="outline-text-2" id="text-1">
+
+
+
+
+<div class="figure">
+<p><img src="pi-rec-bgs-k3.png"  alt="pi-rec-bgs-k3.png" /></p>
+</div>
+
+
+
+
+<pre class="src src-R">
+d <span style="color: #98fb98;">&lt;-</span> read.table(<span style="color: #87cefa;">"pa/pi_rec_BGS.txt"</span>, header=<span style="color: #87ceeb; font-weight: bold;">TRUE</span>)
+
+<span style="color: #add8e6;">## </span><span style="color: #add8e6;">Transform to mean=0 and sd=1
+</span>m <span style="color: #98fb98;">&lt;-</span> data.frame(mapply(<span style="color: #afeeee; font-weight: bold;">function</span>(x, m, s) (x-m)/s, d, mean(d), sd(d)))
+
+
+<span style="color: #add8e6;">## </span><span style="color: #add8e6;">Plot sliding-window mean
+</span><span style="color: #98fb98;">library</span>(zoo)
+m3 <span style="color: #98fb98;">&lt;-</span> data.frame(lapply(m, rollmean, k=3, na.pad=<span style="color: #87ceeb; font-weight: bold;">TRUE</span>))
+col <span style="color: #98fb98;">&lt;-</span> c(<span style="color: #87cefa;">"black"</span>,<span style="color: #87cefa;">"red"</span>,<span style="color: #87cefa;">"blue"</span>)
+matplot(m3, col=col, type=<span style="color: #87cefa;">"l"</span>, lwd=2, lty=1, ylab=<span style="color: #87cefa;">""</span>, xlab=<span style="color: #87cefa;">"physical position"</span>)
+legend(<span style="color: #87cefa;">"topright"</span>, legend=names(m3), col=col, lwd=3, bty=<span style="color: #87cefa;">"n"</span>)
+
+fit <span style="color: #98fb98;">&lt;-</span> list()
+fit$rec <span style="color: #98fb98;">&lt;-</span> lm(m$pi ~ m$rec)
+fit$bgs <span style="color: #98fb98;">&lt;-</span> lm(m$pi ~ m$BGS)
+fit$rec.bgs <span style="color: #98fb98;">&lt;-</span> lm(m$pi ~ m$rec + m$BGS)
+
+loglik <span style="color: #98fb98;">&lt;-</span> sapply(fit, logLik)
+aic <span style="color: #98fb98;">&lt;-</span> sapply(fit, AIC)
+
+p <span style="color: #98fb98;">&lt;-</span> pchisq(2*(loglik[<span style="color: #87cefa;">"rec.bgs"</span>] - loglik[<span style="color: #87cefa;">"rec"</span>]), df=1, lower=<span style="color: #87ceeb; font-weight: bold;">FALSE</span>)
+
+<span style="color: #add8e6;">## </span><span style="color: #add8e6;">Log likelihood and AIC
+</span>print(data.frame(loglik=loglik, AIC=aic, row.names=names(loglik)))
+
+<span style="color: #add8e6;">## </span><span style="color: #add8e6;">ANOVA
+</span>print(anova(fit$rec, fit$rec.bgs))
+
+</pre>
+
+
+</div>
+</div>
+<div id="postamble">
+</div>
+</div>
+</body>
+</html>

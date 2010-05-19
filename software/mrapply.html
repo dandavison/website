@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>mrapply</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2008-08-16 00:26:53 BST"/>
+<meta name="author" content="Dan"/>
+<style type="text/css">
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+</style>
+</head><body>
+<h1 class="title">mrapply</h1>
+<pre class="src src-r"><span style="color: #0000ee; font-weight: bold;">mrapply</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(FUN, ..., MoreArgs=<span style="color: #00cd00;">NULL</span>, SIMPLIFY=<span style="color: #00cd00;">FALSE</span>, check=<span style="color: #00cd00;">TRUE</span>) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">The arguments in ... are n 'trees' (recursive list
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">structures). All n trees must have the same hierarchical
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">structure.  Therefore, sets of corresponding non-list leaf
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">objects can be defined, such that each set 'belongs' to a
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">particular leaf node, and contains the n objects which are
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">found at that node among the n trees. Return a tree of the same
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">structure as the input trees containing at each leaf node the
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">result of applying FUN to the set of objects belonging to that
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">node.
+</span>
+    trees <span style="color: #cd00cd;">&lt;-</span> list(...)
+    ntrees <span style="color: #cd00cd;">&lt;-</span> length(trees)
+    paths <span style="color: #cd00cd;">&lt;-</span> lapply(trees, get.paths)
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(check &amp;&amp; !are.isomorphic.trees(paths=paths))
+        <span style="color: #00cdcd; font-weight: bold;">stop</span>(<span style="color: #00cd00;">"Trees must have the same hierarchical structure."</span>)
+    paths <span style="color: #cd00cd;">&lt;-</span> paths[[1]]
+    nleaves <span style="color: #cd00cd;">&lt;-</span> length(paths)
+    fullpaths <span style="color: #cd00cd;">&lt;-</span> mapply(c, rep(seq_len(ntrees), each=nleaves), rep(paths, ntrees))
+    objs <span style="color: #cd00cd;">&lt;-</span> array(flatten(trees, paths=fullpaths), dim=c(nleaves, ntrees))
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">objs &lt;- apply(objs, 1, function(leaf.objs) list(do.call(FUN, c(leaf.objs, MoreArgs))))
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">if(SIMPLIFY) sapply(objs, identity)
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">else {
+</span>
+    res <span style="color: #cd00cd;">&lt;-</span> rapply(trees[[1]], <span style="color: #00cdcd; font-weight: bold;">function</span>(x) <span style="color: #00cd00;">NULL</span>, how=<span style="color: #00cd00;">"replace"</span>) <span style="color: #cd0000;">## </span><span style="color: #cd0000;">in order to lose attributes
+</span>
+    <span style="color: #cd0000;">##</span><span style="color: #cd0000;">
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">unflatten(objs, skeleton=res)
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">}
+</span>
+    <span style="color: #00cdcd; font-weight: bold;">for</span>(i <span style="color: #00cdcd; font-weight: bold;">in</span> seq_len(nleaves))
+        res[[paths[[i]]]] <span style="color: #cd00cd;">&lt;-</span> do.call(FUN, c(objs[i,], MoreArgs))
+
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(SIMPLIFY) sapply(flatten(res, paths=paths), identity)
+    <span style="color: #00cdcd; font-weight: bold;">else</span> res
+}
+
+<span style="color: #0000ee; font-weight: bold;">flatten</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(tree, paths=get.paths(tree)) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">http://finzi.psych.upenn.edu/R/Rhelp02a/archive/76977.html
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">http://finzi.psych.upenn.edu/R/Rhelp02a/archive/5362.html
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">http://finzi.psych.upenn.edu/R/Rhelp02a/archive/5260.html
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">http://finzi.psych.upenn.edu/R/Rhelp02a/archive/132996.html
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">http://finzi.psych.upenn.edu/R/Rhelp02a/archive/5340.html
+</span>    lapply(paths, <span style="color: #00cdcd; font-weight: bold;">function</span>(path) tree[[path]])
+}
+
+<span style="color: #0000ee; font-weight: bold;">flatten.gg</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(tree) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">Gabor Grothendieck
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">https://stat.ethz.ch/pipermail/r-help/2008-June/164599.html
+</span>    L <span style="color: #cd00cd;">&lt;-</span>  rapply(tree, <span style="color: #00cdcd; font-weight: bold;">function</span>(el) environment(), how = <span style="color: #00cd00;">"unlist"</span>)
+    lapply(L, <span style="color: #00cd00;">"[["</span>, <span style="color: #00cd00;">"el"</span>)
+}
+
+<span style="color: #0000ee; font-weight: bold;">unflatten</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(flesh, skeleton, paths=get.paths(skeleton)) {
+    mapply(<span style="color: #00cdcd; font-weight: bold;">function</span>(obj, path) skeleton[[path]] <span style="color: #cd00cd;">&lt;-</span> obj, flesh, paths)
+    skeleton
+}
+
+<span style="color: #0000ee; font-weight: bold;">are.isomorphic.trees</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(trees, paths=lapply(trees, get.paths)) {
+    paths <span style="color: #cd00cd;">&lt;-</span> do.call(<span style="color: #00cd00;">"mapply"</span>, c(list(rbind), paths))
+    all(sapply(paths, <span style="color: #00cdcd; font-weight: bold;">function</span>(x) nrow(unique(x)) == 1))
+}
+
+<span style="color: #0000ee; font-weight: bold;">get.paths.2</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(node, internal=<span style="color: #00cd00;">FALSE</span>) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">Return a list of 'paths' to all nodes of the tree rooted at
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">`node', where path i is an integer vector such that
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">tree[[path[[i]]]] yields the ith node. internal=FALSE excludes
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">paths to internal nodes from the result.
+</span>
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">not correct
+</span>
+    print(node)
+    paths <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cd00;">NULL</span>
+    <span style="color: #00cdcd; font-weight: bold;">for</span>(i <span style="color: #00cdcd; font-weight: bold;">in</span> seq_along(node)) {
+        <span style="color: #00cdcd; font-weight: bold;">if</span>(is.list(v <span style="color: #cd00cd;">&lt;-</span> node[[i]])) {
+            ipaths <span style="color: #cd00cd;">&lt;-</span> Recall(v, internal=internal)
+            ipaths <span style="color: #cd00cd;">&lt;-</span> lapply(ipaths, <span style="color: #00cdcd; font-weight: bold;">function</span>(path) c(i, path))
+            paths <span style="color: #cd00cd;">&lt;-</span> c(paths, ipaths)
+        }
+    }
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(internal) paths <span style="color: #cd00cd;">&lt;-</span> c(list(<span style="color: #00cd00;">NULL</span>), paths) <span style="color: #cd0000;">## </span><span style="color: #cd0000;">FIXME: this adds list(NULL) as the first element of the final return object
+</span>    paths
+}
+
+<span style="color: #0000ee; font-weight: bold;">get.paths</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(node, internal=<span style="color: #00cd00;">FALSE</span>) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">Return a list of 'paths' to all nodes of the tree rooted at
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">`node', where path i is an integer vector such that
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">tree[[path[[i]]]] yields the ith node. internal=FALSE excludes
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">paths to internal nodes from the result.
+</span>
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(!is.list(node)) <span style="color: #00cdcd; font-weight: bold;">return</span>(<span style="color: #00cd00;">NULL</span>)
+
+    paths <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cd00;">NULL</span>
+    <span style="color: #00cdcd; font-weight: bold;">for</span>(i <span style="color: #00cdcd; font-weight: bold;">in</span> seq_along(node)) {
+        ipaths <span style="color: #cd00cd;">&lt;-</span> Recall(node[[i]], internal=internal)
+        <span style="color: #00cdcd; font-weight: bold;">if</span>(is.null(ipaths)) ipaths <span style="color: #cd00cd;">&lt;-</span> list(i)
+        <span style="color: #00cdcd; font-weight: bold;">else</span> ipaths <span style="color: #cd00cd;">&lt;-</span> lapply(ipaths, <span style="color: #00cdcd; font-weight: bold;">function</span>(path) c(i, path))
+        paths <span style="color: #cd00cd;">&lt;-</span> c(paths, ipaths)
+    }
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(internal) paths <span style="color: #cd00cd;">&lt;-</span> c(list(<span style="color: #00cd00;">NULL</span>), paths) <span style="color: #cd0000;">## </span><span style="color: #cd0000;">FIXME: this adds list(NULL) as the first element of the final return object
+</span>    paths
+}
+
+<span style="color: #00cdcd; font-weight: bold;">if</span>(<span style="color: #00cd00;">FALSE</span>) <span style="color: #0000ee; font-weight: bold;">mapply</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(FUN, ..., MoreArgs=<span style="color: #00cd00;">NULL</span>, SIMPLIFY=<span style="color: #00cd00;">TRUE</span>, USE.NAMES=<span style="color: #00cd00;">TRUE</span>, recursive=<span style="color: #00cd00;">FALSE</span>, check=<span style="color: #00cd00;">TRUE</span>) {
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(!recursive) base::mapply(FUN, ..., MoreArgs=MoreArgs, SIMPLIFY=SIMPLIFY, USE.NAMES=USE.NAMES)
+    <span style="color: #00cdcd; font-weight: bold;">else</span> mrapply(FUN, ..., MoreArgs=MoreArgs, SIMPLIFY=SIMPLIFY, check=check)
+}
+
+<span style="color: #0000ee; font-weight: bold;">mrsapply</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(FUN, ..., MoreArgs=<span style="color: #00cd00;">NULL</span>, check=<span style="color: #00cd00;">TRUE</span>)
+    mrapply(FUN, ..., MoreArgs=<span style="color: #00cd00;">NULL</span>, SIMPLIFY=<span style="color: #00cd00;">TRUE</span>, check=<span style="color: #00cd00;">TRUE</span>)
+
+<span style="color: #0000ee; font-weight: bold;">example.mrapply</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>() {
+    w <span style="color: #cd00cd;">&lt;-</span> list(matrix(1,2,2), list(matrix(2,2,2), matrix(3,2,2)))
+    mrapply(<span style="color: #00cd00;">"+"</span>, w, w)
+    mrsapply(<span style="color: #00cd00;">"+"</span>, w, w)
+
+    sink(tempfile())
+    example(lm, ask=<span style="color: #00cd00;">FALSE</span>)
+    sink(<span style="color: #00cd00;">NULL</span>)
+    str(mrapply(all.equal, lm.D9, lm.D90))
+}
+
+<span style="color: #0000ee; font-weight: bold;">mrapply.orig</span> <span style="color: #cd00cd;">&lt;-</span>  <span style="color: #00cdcd; font-weight: bold;">function</span>(f, ...) {
+    trees <span style="color: #cd00cd;">&lt;-</span>  list(...)
+    paths <span style="color: #cd00cd;">&lt;-</span>  get.paths(trees[[1]])
+    <span style="color: #0000ee; font-weight: bold;">get.objs</span> <span style="color: #cd00cd;">&lt;-</span>  <span style="color: #00cdcd; font-weight: bold;">function</span>(tree) lapply(paths, <span style="color: #00cdcd; font-weight: bold;">function</span>(path) tree[[path]])
+    objs.by.tree <span style="color: #cd00cd;">&lt;-</span>  lapply(trees, get.objs)
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">the following is a kind of transpose, so maybe do with a matrix of lists??
+</span>    objs.by.node <span style="color: #cd00cd;">&lt;-</span>  do.call(<span style="color: #00cd00;">"mapply"</span>, c(list(FUN=list), objs.by.tree, list(SIMPLIFY=<span style="color: #00cd00;">FALSE</span>)))
+    ans.by.node <span style="color: #cd00cd;">&lt;-</span>  lapply(objs.by.node, <span style="color: #00cdcd; font-weight: bold;">function</span>(obj.list) do.call(f, obj.list))
+    ans <span style="color: #cd00cd;">&lt;-</span>  trees[[1]]
+    <span style="color: #0000ee; font-weight: bold;">put.objs</span> <span style="color: #cd00cd;">&lt;-</span>  <span style="color: #00cdcd; font-weight: bold;">function</span>(obj, path) ans[[path]] <span style="color: #cd00cd;">&lt;&lt;-</span>  obj
+    mapply(put.objs, ans.by.node, paths)
+    ans
+}
+</pre>
+
+</div>
+<div id="postamble"><p class="author"> Author: Dan
+<a href="mailto:dan@Tichodroma">&lt;dan@Tichodroma&gt;</a>
+</p>
+<p class="date"> Date: 2008-08-16 00:26:53 BST</p>
+<p>HTML generated by org-mode 6.06pre01 in emacs 23<p>
+</div></body>
+</html>

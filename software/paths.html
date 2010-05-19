@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>some functions for doing stuff to trees</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2008-09-05 17:15:50 BST"/>
+<meta name="author" content="Dan"/>
+<style type="text/css">
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+</style><link rel=stylesheet
+                       href="style.css"
+                       type="text/css">
+</head><body>
+<h1 class="title">some functions for doing stuff to trees</h1>
+<pre class="src src-r"><span style="color: #0000ee; font-weight: bold;">get.paths</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(node, internal=<span style="color: #00cd00;">TRUE</span>) {
+    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">Return a list of 'paths' to all nodes of the tree rooted at
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">`node', where path i is an integer vector such that
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">tree[[path[[i]]]] yields the ith node. internal=FALSE excludes
+</span>    <span style="color: #cd0000;">## </span><span style="color: #cd0000;">paths to internal nodes from the result.
+</span>
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(!is.list(node)) <span style="color: #00cdcd; font-weight: bold;">return</span>(<span style="color: #00cd00;">NULL</span>)
+
+    paths <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cd00;">NULL</span>
+    <span style="color: #00cdcd; font-weight: bold;">for</span>(i <span style="color: #00cdcd; font-weight: bold;">in</span> seq_along(node)) {
+        ipaths <span style="color: #cd00cd;">&lt;-</span> get.paths(node[[i]], internal=internal)
+        <span style="color: #00cdcd; font-weight: bold;">if</span>(is.null(ipaths)) ipaths <span style="color: #cd00cd;">&lt;-</span> list(i)
+        <span style="color: #00cdcd; font-weight: bold;">else</span> ipaths <span style="color: #cd00cd;">&lt;-</span> lapply(ipaths, <span style="color: #00cdcd; font-weight: bold;">function</span>(path) c(i, path))
+        paths <span style="color: #cd00cd;">&lt;-</span> c(paths, ipaths)
+    }
+    <span style="color: #00cdcd; font-weight: bold;">if</span>(internal) paths <span style="color: #cd00cd;">&lt;-</span> c(list(<span style="color: #00cd00;">NULL</span>), paths) <span style="color: #cd0000;">## </span><span style="color: #cd0000;">FIXME: this adds list(NULL) as the first element of the final return object
+</span>    paths
+}
+
+<span style="color: #0000ee; font-weight: bold;">set.branch.lengths</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(dend) {
+    paths <span style="color: #cd00cd;">&lt;-</span> get.paths(dend, internal=<span style="color: #00cd00;">TRUE</span>)
+    paths <span style="color: #cd00cd;">&lt;-</span> paths[-1] <span style="color: #cd0000;">## </span><span style="color: #cd0000;">because of a bug/feature of get.paths(internal=TRUE)
+</span>    <span style="color: #00cdcd; font-weight: bold;">for</span>(path <span style="color: #00cdcd; font-weight: bold;">in</span> paths) {
+        level <span style="color: #cd00cd;">&lt;-</span> length(path)
+        <span style="color: #00cdcd; font-weight: bold;">if</span>(level &gt; 1) parent <span style="color: #cd00cd;">&lt;-</span> dend[[path[-level]]]
+        <span style="color: #00cdcd; font-weight: bold;">else</span> parent <span style="color: #cd00cd;">&lt;-</span> dend
+        attr(dend[[path]], <span style="color: #00cd00;">"bl"</span>) <span style="color: #cd00cd;">&lt;-</span> attr(parent, <span style="color: #00cd00;">"height"</span>) - attr(dend[[path]], <span style="color: #00cd00;">"height"</span>)
+    }
+    dend
+}
+
+<span style="color: #0000ee; font-weight: bold;">get.descendents</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(path, paths) {
+    level <span style="color: #cd00cd;">&lt;-</span> length(path)
+    which(sapply(paths, <span style="color: #00cdcd; font-weight: bold;">function</span>(p) all(p[1:level] == path)))
+}
+
+<span style="color: #0000ee; font-weight: bold;">set.descendents</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(tree) {
+    paths <span style="color: #cd00cd;">&lt;-</span> get.paths(tree, internal=<span style="color: #00cd00;">TRUE</span>)
+    paths <span style="color: #cd00cd;">&lt;-</span> paths[-1] <span style="color: #cd0000;">## </span><span style="color: #cd0000;">because of a bug/feature of get.paths(internal=TRUE)
+</span>    attr(tree, <span style="color: #00cd00;">"descendents"</span>) <span style="color: #cd00cd;">&lt;-</span> length(paths)
+    <span style="color: #00cdcd; font-weight: bold;">for</span>(path <span style="color: #00cdcd; font-weight: bold;">in</span> paths)
+        attr(tree[[path]], <span style="color: #00cd00;">"descendents"</span>) <span style="color: #cd00cd;">&lt;-</span> get.descendents(path, paths)
+    tree
+}
+
+<span style="color: #0000ee; font-weight: bold;">set.edge.text</span> <span style="color: #cd00cd;">&lt;-</span> <span style="color: #00cdcd; font-weight: bold;">function</span>(dend) {
+    paths <span style="color: #cd00cd;">&lt;-</span> get.paths(dend, internal=<span style="color: #00cd00;">TRUE</span>)
+    paths <span style="color: #cd00cd;">&lt;-</span> paths[-1] <span style="color: #cd0000;">## </span><span style="color: #cd0000;">because of a bug/feature of get.paths(internal=TRUE)
+</span>    <span style="color: #00cdcd; font-weight: bold;">for</span>(path <span style="color: #00cdcd; font-weight: bold;">in</span> paths) {
+        desc <span style="color: #cd00cd;">&lt;-</span> paste(attr(dend[[path]], <span style="color: #00cd00;">"descendents"</span>), collapse=<span style="color: #00cd00;">"-"</span>)
+        bl <span style="color: #cd00cd;">&lt;-</span> round(attr(dend[[path]], <span style="color: #00cd00;">"bl"</span>), 2)
+        attr(dend[[path]], <span style="color: #00cd00;">"edgetext"</span>) <span style="color: #cd00cd;">&lt;-</span> paste(<span style="color: #00cd00;">"bl = "</span>, bl, <span style="color: #00cd00;">"\ndescs:"</span>, desc, sep=<span style="color: #00cd00;">""</span>)
+    }
+    dend
+}
+</pre>
+
+</div>
+</body>
+</html>

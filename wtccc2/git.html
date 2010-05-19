@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+
+<title>git</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2009-08-18 13:51:59 BST"/>
+<meta name="author" content="Dan Davison"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">git</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Setting up parent and local repositories </a>
+<ul>
+<li><a href="#sec-1.1">1.1 Initialise parent git repository </a></li>
+<li><a href="#sec-1.2">1.2 Add files to repository </a></li>
+<li><a href="#sec-1.3">1.3 Commit those changes </a></li>
+<li><a href="#sec-1.4">1.4 Create local repositories in our home directories </a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Working </a>
+<ul>
+<li><a href="#sec-2.1">2.1 Simple version </a>
+<ul>
+<li><a href="#sec-2.1.1">2.1.1 Make local changes </a></li>
+<li><a href="#sec-2.1.2">2.1.2 Register your changes by adding and committing </a></li>
+<li><a href="#sec-2.1.3">2.1.3 Push your changes to the master repository </a></li>
+</ul>
+</li>
+<li><a href="#sec-2.2">2.2 Working with branches </a>
+<ul>
+<li><a href="#sec-2.2.1">2.2.1 Create new branch </a></li>
+<li><a href="#sec-2.2.2">2.2.2 Share new branch </a></li>
+<li><a href="#sec-2.2.3">2.2.3 Get a new branch from the parent repository </a></li>
+<li><a href="#sec-2.2.4">2.2.4 Merge a branch into master branch </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Using git with emacs </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Setting up parent and local repositories </h2>
+<div class="outline-text-2" id="text-1">
+
+
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1"><span class="section-number-3">1.1</span> Initialise parent git repository </h3>
+<div class="outline-text-3" id="text-1.1">
+
+
+
+
+<pre class="src src-sh"><span style="color: #da70d6;">cd</span> /data/oak/project/wtccc2
+git init
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2"><span class="section-number-3">1.2</span> Add files to repository </h3>
+<div class="outline-text-3" id="text-1.2">
+
+<p>With git, you always make changes in two steps: first you add files,
+then you commit them.  For now let's say we avoid adding large data
+files to the repository, to avoid any duplication of those files when
+people create their own repositories. So for example, add the
+following code directories to the repository:
+</p>
+
+
+<pre class="src src-sh">git add src/Rcode
+git add src/scripts
+git add src/binarise
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1.3" class="outline-3">
+<h3 id="sec-1.3"><span class="section-number-3">1.3</span> Commit those changes </h3>
+<div class="outline-text-3" id="text-1.3">
+
+<p>-m option specifies the commit message.
+</p>
+
+
+<pre class="src src-sh">git commit -m <span style="color: #bc8f8f;">"Initialising wtccc2 repository with some code directories"</span>
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-1.4" class="outline-3">
+<h3 id="sec-1.4"><span class="section-number-3">1.4</span> Create local repositories in our home directories </h3>
+<div class="outline-text-3" id="text-1.4">
+
+<p>Choose a place in your home directory to clone the repo. This step
+will create a directory called wtccc2 so make sure you're somewhere
+where there is not already a directory with that name.
+</p>
+
+
+<pre class="src src-sh"><span style="color: #da70d6;">cd</span> ~/wherever/you/want/to/clone/repo
+git clone /data/oak/project/wtccc2
+
+</pre>
+
+
+
+<p>
+Alternatively, if you want to keep the repository on a different machine then
+</p>
+
+
+<pre class="src src-sh">git clone username@oak:/data/oak/project/wtccc2
+
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Working </h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> Simple version </h3>
+<div class="outline-text-3" id="text-2.1">
+
+
+</div>
+
+<div id="outline-container-2.1.1" class="outline-4">
+<h4 id="sec-2.1.1"><span class="section-number-4">2.1.1</span> Make local changes </h4>
+<div class="outline-text-4" id="text-2.1.1">
+
+<p>Now edit those code files in your home directory
+</p></div>
+
+</div>
+
+<div id="outline-container-2.1.2" class="outline-4">
+<h4 id="sec-2.1.2"><span class="section-number-4">2.1.2</span> Register your changes by adding and committing </h4>
+<div class="outline-text-4" id="text-2.1.2">
+
+
+
+
+<pre class="src src-sh">git add src/Rcode/whatever.R
+git commit -m <span style="color: #bc8f8f;">"I just made whatever.R much better."</span>
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.1.3" class="outline-4">
+<h4 id="sec-2.1.3"><span class="section-number-4">2.1.3</span> Push your changes to the master repository </h4>
+<div class="outline-text-4" id="text-2.1.3">
+
+
+
+
+<pre class="src src-sh">git push
+
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> Working with branches </h3>
+<div class="outline-text-3" id="text-2.2">
+
+
+</div>
+
+<div id="outline-container-2.2.1" class="outline-4">
+<h4 id="sec-2.2.1"><span class="section-number-4">2.2.1</span> Create new branch </h4>
+<div class="outline-text-4" id="text-2.2.1">
+
+<p>If you are working on changes that you don't necessarily want to
+share with everybody immediately, you should create a new branch and
+make your changes there. It's not hard:
+</p>
+
+
+<pre class="src src-sh">git branch <span style="color: #bc8f8f;">"new-branch-name"</span>
+git checkout <span style="color: #bc8f8f;">"new branch"</span>
+
+</pre>
+
+
+
+<p>
+Now make whatever changes you want, and add and commit them as normal.
+</p></div>
+
+</div>
+
+<div id="outline-container-2.2.2" class="outline-4">
+<h4 id="sec-2.2.2"><span class="section-number-4">2.2.2</span> Share new branch </h4>
+<div class="outline-text-4" id="text-2.2.2">
+
+<p>Two things to note:
+</p><ol>
+<li>
+The main branch will always be called "master"
+</li>
+<li>
+The parent repository is referred to as "origin"
+
+</li>
+</ol>
+
+<p>This command pushes your new branch to the shared parent repository:
+</p>
+
+
+<pre class="src src-sh">git push origin new-branch-name
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.2.3" class="outline-4">
+<h4 id="sec-2.2.3"><span class="section-number-4">2.2.3</span> Get a new branch from the parent repository </h4>
+<div class="outline-text-4" id="text-2.2.3">
+
+<p>Say someone else has created a new branch and pushed it to the
+shared repository and now you want it.
+</p>
+
+
+<pre class="src src-sh">git branch new-branch-name origin/new-branch-name
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.2.4" class="outline-4">
+<h4 id="sec-2.2.4"><span class="section-number-4">2.2.4</span> Merge a branch into master branch </h4>
+<div class="outline-text-4" id="text-2.2.4">
+
+<p>This isn't hard. First checkout the master branch, and then merge
+the new branch in. Think of the merge command as saying "merge
+this branch into the branch I'm currently on":
+</p>
+
+
+<pre class="src src-sh">git checkout master
+git merge new-branch-name
+
+</pre>
+
+
+
+<p>
+And, obviously, push the merged branch if you want others to have access to it:
+</p>
+
+
+<pre class="src src-sh">git push
+
+</pre>
+
+
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Using git with emacs </h2>
+<div class="outline-text-2" id="text-3">
+
+<p>Do this by using a major mode called magit-mode, Download and unpack
+the source from <a href="http://zagadka.vm.bytemark.co.uk/magit/magit-0.7.tar.gz">here</a>. This will create a directory containing a file
+called magit.el. Now add the following to your ~/.emacs file:
+</p>
+
+
+<pre class="src src-emacs-lisp">(add-to-list 'load-path <span style="color: #bc8f8f;">"/wherever/you/put/magit/folder"</span>)
+(<span style="color: #a020f0;">require</span> '<span style="color: #5f9ea0;">magit</span>)
+(global-set-key <span style="color: #bc8f8f;">"\C-cm"</span> 'magit-status)
+
+</pre>
+
+
+
+<p>
+Emacs should automatically recognise that a file is controlled by
+git. You can use magit to add and commit changes (as well as push
+them to master repository, etc). To do that type \C-cm (i.e. type
+control-c then release control and hit m). You should see lists of
+files in the project. The following keys do stuff:
+</p><ul>
+<li>
+up/down arrows: select a file
+</li>
+<li>
+&lt;tab&gt;: hide/show the diff for that file
+</li>
+<li>
+&lt;return&gt;: jump to the file
+</li>
+<li>
+s: add the file ("adding" is also called "staging")
+</li>
+<li>
+c: commit a staged file
+</li>
+</ul>
+</div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Dan Davison
+<a href="mailto:davison@stats.ox.ac.uk">&lt;davison@stats.ox.ac.uk&gt;</a>
+</p>
+<p class="date"> Date: 2009-08-18 13:51:59 BST</p>
+<p class="creator">HTML generated by org-mode 6.29trans in emacs 23</p>
+</div>
+</div>
+</body>
+</html>

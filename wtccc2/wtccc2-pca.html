@@ -1,0 +1,718 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+
+<title>PCA analysis of WTCCC2 data</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2009-10-12 17:02:30 EDT"/>
+<meta name="author" content="Dan Davison"/>
+<meta name="description" content=""/>
+<meta name="keywords" content=""/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #add8e6; font-weight:normal }
+  .target { }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">PCA analysis of WTCCC2 data</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Description </a></li>
+<li><a href="#sec-2">2 Header </a>
+<ul>
+<li><a href="#sec-2.1">2.1 Imports </a></li>
+<li><a href="#sec-2.2">2.2 Globals </a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 Main class </a>
+<ul>
+<li><a href="#sec-3.1">3.1 Init </a></li>
+<li><a href="#sec-3.2">3.2 Main </a>
+<ul>
+<li><a href="#sec-3.2.1">3.2.1 Say hello </a></li>
+</ul>
+</li>
+<li><a href="#sec-3.3">3.3 Create data set </a>
+<ul>
+<li><a href="#sec-3.3.1">3.3.1 Insect and cat chromosome files </a></li>
+<li><a href="#sec-3.3.2">3.3.2 Subset snps and convert to geno </a></li>
+<li><a href="#sec-3.3.3">3.3.3 Make individual exclusions </a></li>
+<li><a href="#sec-3.3.4">3.3.4 Combine data across cohorts </a></li>
+</ul>
+</li>
+<li><a href="#sec-3.4">3.4 PCA </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4 Utilities </a>
+<ul>
+<li><a href="#sec-4.1">4.1 Genotype file </a></li>
+<li><a href="#sec-4.2">4.2 Sample file </a></li>
+<li><a href="#sec-4.3">4.3 Restricted genofile </a></li>
+<li><a href="#sec-4.4">4.4 Exclude dir </a></li>
+<li><a href="#sec-4.5">4.5 Excluded genofile </a></li>
+<li><a href="#sec-4.6">4.6 Popen </a></li>
+<li><a href="#sec-4.7">4.7 System </a></li>
+<li><a href="#sec-4.8">4.8 Flatten </a></li>
+<li><a href="#sec-4.9">4.9 Run from command line </a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5 Org config </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Description </h2>
+<div class="outline-text-2" id="text-1">
+
+<p>This program performs PCA of a data set of SNP genotypes defined by
+the following specifications:
+</p><ul>
+<li>
+The WTCCC2 cohorts to be included
+</li>
+<li>
+The chromosomes to be included
+</li>
+<li>
+The SNPs to be included
+
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Header </h2>
+<div class="outline-text-2" id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1"><span class="section-number-3">2.1</span> Imports </h3>
+<div class="outline-text-3" id="text-2.1">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">import</span> sys, os, time
+<span style="color: #afeeee; font-weight: bold;">from</span> cmdline <span style="color: #afeeee; font-weight: bold;">import</span> CommandLineApp
+<span style="color: #afeeee; font-weight: bold;">import</span> subprocess
+<span style="color: #afeeee; font-weight: bold;">from</span> subprocess <span style="color: #afeeee; font-weight: bold;">import</span> PIPE
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.2" class="outline-3">
+<h3 id="sec-2.2"><span class="section-number-3">2.2</span> Globals </h3>
+<div class="outline-text-3" id="text-2.2">
+
+
+
+
+<pre class="src src-python"><span style="color: #40e0d0; font-weight: bold;">__width__</span> = 30
+<span style="color: #40e0d0; font-weight: bold;">__home__</span> = subprocess.Popen(<span style="color: #87cefa;">'echo $HOME'</span>, shell=<span style="color: #afeeee; font-weight: bold;">True</span>, stdout=PIPE).communicate()[0].strip()
+<span style="color: #40e0d0; font-weight: bold;">__datadir__</span> = __home__ + <span style="color: #87cefa;">'/data/wtccc2'</span>
+<span style="color: #40e0d0; font-weight: bold;">__dry_run__</span> = <span style="color: #afeeee; font-weight: bold;">False</span>
+
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Main class </h2>
+<div class="outline-text-2" id="text-3">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">class</span> <span style="color: #87ceeb; font-weight: bold;">PCA</span>(CommandLineApp):
+
+</pre>
+
+
+
+
+</div>
+
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1"><span class="section-number-3">3.1</span> Init </h3>
+<div class="outline-text-3" id="text-3.1">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">__init__</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    CommandLineApp.__init__(<span style="color: #afeeee; font-weight: bold;">self</span>)
+
+    op = <span style="color: #afeeee; font-weight: bold;">self</span>.option_parser
+    op.set_usage(<span style="color: #87cefa;">'usage: not sure at the moment'</span>)
+
+    op.add_option(<span style="color: #87cefa;">'--cohorts'</span>, dest=<span style="color: #87cefa;">'cohorts'</span>, <span style="color: #7fffd4;">type</span>=<span style="color: #87cefa;">'string'</span>, default=<span style="color: #87cefa;">''</span>,
+                  <span style="color: #7fffd4;">help</span>=<span style="color: #87cefa;">'Space-separated list of cohorts'</span>)
+    op.add_option(<span style="color: #87cefa;">'--chrom'</span>, dest=<span style="color: #87cefa;">'chroms'</span>, <span style="color: #7fffd4;">type</span>=<span style="color: #87cefa;">'string'</span>, default=<span style="color: #98fb98;">None</span>,
+                  <span style="color: #7fffd4;">help</span>=<span style="color: #87cefa;">'Chromosomes to include (space-separated; default is 1-22)'</span>)
+    op.add_option(<span style="color: #87cefa;">'--snpfile'</span>, dest=<span style="color: #87cefa;">'snpfile'</span>, <span style="color: #7fffd4;">type</span>=<span style="color: #87cefa;">'string'</span>, default=<span style="color: #98fb98;">None</span>,
+                  <span style="color: #7fffd4;">help</span>=<span style="color: #87cefa;">'File containing SNPs to use (.map format)'</span>)
+    op.add_option(<span style="color: #87cefa;">'-n'</span>, dest=<span style="color: #87cefa;">'dry_run'</span>, default=<span style="color: #afeeee; font-weight: bold;">False</span>, action=<span style="color: #87cefa;">'store_true'</span>,
+                  <span style="color: #7fffd4;">help</span>=<span style="color: #87cefa;">"Don't actually do anything, just print commands"</span>)
+    op.add_option(<span style="color: #87cefa;">'--platform'</span>, dest=<span style="color: #87cefa;">'platform'</span>, <span style="color: #7fffd4;">type</span>=<span style="color: #87cefa;">'string'</span>, default=<span style="color: #87cefa;">'illumina'</span>)
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.2" class="outline-3">
+<h3 id="sec-3.2"><span class="section-number-3">3.2</span> Main </h3>
+<div class="outline-text-3" id="text-3.2">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">main</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts = <span style="color: #afeeee; font-weight: bold;">self</span>.options.cohorts.split()
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">self</span>.options.chroms:
+        <span style="color: #afeeee; font-weight: bold;">self</span>.chroms = <span style="color: #7fffd4;">map</span>(<span style="color: #7fffd4;">int</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.options.chroms.split())
+    <span style="color: #afeeee; font-weight: bold;">else</span>:
+        <span style="color: #afeeee; font-weight: bold;">self</span>.chroms = [c+1 <span style="color: #afeeee; font-weight: bold;">for</span> c <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #7fffd4;">range</span>(22)]
+    <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile = <span style="color: #afeeee; font-weight: bold;">self</span>.options.snpfile
+    <span style="color: #afeeee; font-weight: bold;">self</span>.say_hello()
+    <span style="color: #afeeee; font-weight: bold;">self</span>.create_data_set()
+    <span style="color: #afeeee; font-weight: bold;">self</span>.pca()
+
+</pre>
+
+
+
+
+
+</div>
+
+<div id="outline-container-3.2.1" class="outline-4">
+<h4 id="sec-3.2.1"><span class="section-number-4">3.2.1</span> Say hello </h4>
+<div class="outline-text-4" id="text-3.2.1">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">say_hello</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    <span style="color: #afeeee; font-weight: bold;">print</span>(time.ctime())
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Cohorts'</span>.ljust(__width__) + <span style="color: #87cefa;">'%s'</span> % <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts)
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Chromosomes'</span>.ljust(__width__) + <span style="color: #87cefa;">'%s'</span> % <span style="color: #afeeee; font-weight: bold;">self</span>.chroms)
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'SNP file'</span>.ljust(__width__) + <span style="color: #87cefa;">'%s'</span> % <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile)
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">self</span>.options.dry_run:
+        <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Dry run'</span>)
+
+</pre>
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3.3" class="outline-3">
+<h3 id="sec-3.3"><span class="section-number-3">3.3</span> Create data set </h3>
+<div class="outline-text-3" id="text-3.3">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">create_data_set</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'</span>)
+
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Intersecting and concatenating chromosome files\n'</span>)
+
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> <span style="color: #7fffd4;">all</span>(<span style="color: #7fffd4;">map</span>(os.path.exists, [coh + <span style="color: #87cefa;">'.gen'</span> <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts])):
+        <span style="color: #afeeee; font-weight: bold;">self</span>.insect_and_cat_chromosome_files()
+
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'</span>)
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Restricting to selected SNPs and converting to .geno\n'</span>)
+
+    basenames = [restricted_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts]
+    xbasenames = [excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts]
+    <span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">files_exist</span>(bnames):
+        geno = [b + <span style="color: #87cefa;">'.geno'</span> <span style="color: #afeeee; font-weight: bold;">for</span> b <span style="color: #afeeee; font-weight: bold;">in</span> bnames]
+        maps = [b + <span style="color: #87cefa;">'.map'</span> <span style="color: #afeeee; font-weight: bold;">for</span> b <span style="color: #afeeee; font-weight: bold;">in</span> bnames]
+        <span style="color: #afeeee; font-weight: bold;">return</span> <span style="color: #7fffd4;">all</span>(<span style="color: #7fffd4;">map</span>(os.path.exists, flatten([geno, maps])))
+
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> files_exist(basenames) <span style="color: #afeeee; font-weight: bold;">and</span> files_exist(xbasenames):
+        <span style="color: #afeeee; font-weight: bold;">self</span>.subset_snps_and_convert_to_geno()
+
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'</span>)
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Excluding individuals\n'</span>)
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> <span style="color: #7fffd4;">all</span>(<span style="color: #7fffd4;">map</span>(os.path.exists,
+                   [excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts])):
+        <span style="color: #afeeee; font-weight: bold;">self</span>.exclude_individuals()
+
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'</span>)
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">'Combining data across cohorts\n'</span>)
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> os.path.exists(excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) + <span style="color: #87cefa;">'.geno'</span>):
+        <span style="color: #afeeee; font-weight: bold;">self</span>.combine_cohorts()
+</pre>
+
+
+
+
+</div>
+
+<div id="outline-container-3.3.1" class="outline-4">
+<h4 id="sec-3.3.1"><span class="section-number-4">3.3.1</span> Insect and cat chromosome files </h4>
+<div class="outline-text-4" id="text-3.3.1">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">insect_and_cat_chromosome_files</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    outdir = <span style="color: #87cefa;">'insect_out'</span>
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> os.path.exists(outdir): os.mkdir(outdir)
+    <span style="color: #afeeee; font-weight: bold;">for</span> chrom <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.chroms:
+        fnames = [<span style="color: #87cefa;">'%s-%02d.tmp'</span> % (coh, chrom) <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts]
+        <span style="color: #afeeee; font-weight: bold;">for</span> i <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #7fffd4;">range</span>(<span style="color: #7fffd4;">len</span>(<span style="color: #afeeee; font-weight: bold;">self</span>.cohorts)):
+            coh = <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts[i]
+            <span style="color: #afeeee; font-weight: bold;">with</span> <span style="color: #7fffd4;">open</span>(fnames[i], <span style="color: #87cefa;">'w'</span>) <span style="color: #afeeee; font-weight: bold;">as</span> f:
+                Popen([<span style="color: #87cefa;">'gunzip'</span>, <span style="color: #87cefa;">'-vc'</span>, gen_gz_file(coh, chrom)], stdout=f).communicate()
+
+        cmd = [<span style="color: #87cefa;">'insect'</span>, <span style="color: #87cefa;">'-v'</span>, <span style="color: #87cefa;">"-d ' '"</span>, <span style="color: #87cefa;">'-f 2'</span>, <span style="color: #87cefa;">'-o '</span> + outdir] + fnames
+        <span style="color: #add8e6;"># subprocess.Popen(cmd, shell=True).communicate()
+</span>        os.system(<span style="color: #87cefa;">' '</span>.join(cmd))
+        <span style="color: #7fffd4;">map</span>(os.remove, fnames)
+
+    <span style="color: #add8e6;"># concatenate chromosome files
+</span>    <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts:
+        <span style="color: #afeeee; font-weight: bold;">with</span> <span style="color: #7fffd4;">open</span>(coh + <span style="color: #87cefa;">'.gen'</span>, <span style="color: #87cefa;">'w'</span>) <span style="color: #afeeee; font-weight: bold;">as</span> f:
+            cmd = <span style="color: #87cefa;">'cat %s/%s-*'</span> % (outdir, coh)
+            Popen([cmd], shell=<span style="color: #afeeee; font-weight: bold;">True</span>, stdout=f).communicate()
+        <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span>(os.path.exists(coh + <span style="color: #87cefa;">'.sample'</span>)):
+            os.symlink(sample_file(coh), coh + <span style="color: #87cefa;">'.sample'</span>)
+    system(<span style="color: #87cefa;">'rm %s/* &amp;&amp; rmdir %s'</span> % (outdir, outdir))
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.3.2" class="outline-4">
+<h4 id="sec-3.3.2"><span class="section-number-4">3.3.2</span> Subset snps and convert to geno </h4>
+<div class="outline-text-4" id="text-3.3.2">
+
+<ul>
+<li>
+In each cohort create a .geno file at the requested SNPs
+
+</li>
+</ul>
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">subset_snps_and_convert_to_geno</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts:
+        cmd = <span style="color: #87cefa;">'shellfish --make-geno --file %s --file2 %s --out %s'</span> % \
+            (coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile, restricted_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) )
+        <span style="color: #afeeee; font-weight: bold;">print</span>(cmd)
+        os.system(cmd)
+        <span style="color: #add8e6;"># system('rm %s.gen %s.map' % (coh,coh))
+</span>
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.3.3" class="outline-4">
+<h4 id="sec-3.3.3"><span class="section-number-4">3.3.3</span> Make individual exclusions </h4>
+<div class="outline-text-4" id="text-3.3.3">
+
+<ul>
+<li>
+In each cohort, make the project exclusions
+
+</li>
+</ul>
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">exclude_individuals</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts:
+        cmd = <span style="color: #87cefa;">'cat %s/*.exclude.txt | sort | uniq &gt; %s.xids'</span> % \
+            (exclude_dir(coh), coh)
+        system(cmd)
+
+        cmd = <span style="color: #87cefa;">"sed 1,2d %s | cut -d ' ' -f 1 | match %s.xids &gt; %s.xidx"</span> % \
+            (sample_file(coh), coh, coh)
+        system(cmd)
+
+        cmd = <span style="color: #87cefa;">'echo "%s: `grep -F NA %s.xidx  | wc -l` excluded individuals not recognised"'</span> % \
+            (coh, coh)
+        system(cmd)
+
+        cmd = <span style="color: #87cefa;">'grep -vF NA %s.xidx | sort -n &gt; tmp &amp;&amp; mv tmp %s.xidx'</span> % \
+            (coh, coh)
+        system(cmd)
+
+        cmd = <span style="color: #87cefa;">'columns -v -f %s.xidx &lt; %s.geno &gt; %s.geno'</span> % \
+            (coh,
+             restricted_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile),
+             excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile))
+        system(cmd)
+
+        cmd = <span style="color: #87cefa;">"sed 1,2d %s | cut -d ' ' -f 1 | slice -v --line-file %s.xidx &gt; %s.xids"</span> % \
+            (sample_file(coh), coh, excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile))
+        system(cmd)
+
+        <span style="color: #add8e6;"># system('rm %s.gen' % restricted_genofile(coh, self.snpfile))
+</span>        system(<span style="color: #87cefa;">'cp %s.map %s.map'</span> % (restricted_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile), excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile)))
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-3.3.4" class="outline-4">
+<h4 id="sec-3.3.4"><span class="section-number-4">3.3.4</span> Combine data across cohorts </h4>
+<div class="outline-text-4" id="text-3.3.4">
+
+<ul>
+</ul>
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">combine_cohorts</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    cohort_geno_files = [excluded_genofile(coh, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) + <span style="color: #87cefa;">'.geno'</span> <span style="color: #afeeee; font-weight: bold;">for</span> coh <span style="color: #afeeee; font-weight: bold;">in</span> <span style="color: #afeeee; font-weight: bold;">self</span>.cohorts]
+    cmd = <span style="color: #87cefa;">"paste -d '\\0' %s &gt; %s"</span> % (
+        <span style="color: #87cefa;">' '</span>.join(cohort_geno_files),
+        excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) + <span style="color: #87cefa;">'.geno'</span>)
+    system(cmd)
+    system(<span style="color: #87cefa;">'rm %s'</span> % <span style="color: #87cefa;">' '</span>.join(cohort_geno_files))
+
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3.4" class="outline-3">
+<h3 id="sec-3.4"><span class="section-number-3">3.4</span> PCA </h3>
+<div class="outline-text-3" id="text-3.4">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">pca</span>(<span style="color: #afeeee; font-weight: bold;">self</span>):
+    remote = <span style="color: #87cefa;">'login2-cluster1'</span>
+    <span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #afeeee; font-weight: bold;">not</span> os.path.exists(excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile) + <span style="color: #87cefa;">'.evecs'</span>):
+        tup = ((excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile),) * 2) + (remote,)
+        <span style="color: #afeeee; font-weight: bold;">try</span>:
+            cmd = <span style="color: #87cefa;">'scp %s.geno %s.map %s:'</span> % tup
+        <span style="color: #afeeee; font-weight: bold;">except</span>:
+            <span style="color: #afeeee; font-weight: bold;">print</span> tup
+            <span style="color: #afeeee; font-weight: bold;">print</span> <span style="color: #87cefa;">'format tuple failed'</span>
+            <span style="color: #afeeee; font-weight: bold;">raise</span>
+        system(cmd)
+        remote_cmd = <span style="color: #87cefa;">"'nohup shellfish --pca --sge --sge-level 4 --numpcs 10 --maxprocs 500 --file %s --out %s &gt; pca.log &amp;'"</span> % (
+            excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile), excluded_genofile(<span style="color: #87cefa;">'all'</span>, <span style="color: #afeeee; font-weight: bold;">self</span>.snpfile))
+        cmd = <span style="color: #87cefa;">'ssh %s %s'</span> % (remote, remote_cmd)
+        system(cmd)
+
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Utilities </h2>
+<div class="outline-text-2" id="text-4">
+
+
+</div>
+
+<div id="outline-container-4.1" class="outline-3">
+<h3 id="sec-4.1"><span class="section-number-3">4.1</span> Genotype file </h3>
+<div class="outline-text-3" id="text-4.1">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">gen_gz_file</span>(coh, chrom):
+    <span style="color: #afeeee; font-weight: bold;">return</span> <span style="color: #87cefa;">'%s/%s/illumina/calls/%s_%02d_illumina.gen.gz'</span> % \
+        (__datadir__, coh, coh, chrom)
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.2" class="outline-3">
+<h3 id="sec-4.2"><span class="section-number-3">4.2</span> Sample file </h3>
+<div class="outline-text-3" id="text-4.2">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">sample_file</span>(coh):
+    <span style="color: #afeeee; font-weight: bold;">return</span> <span style="color: #87cefa;">'%s/%s/illumina/calls/%s_illumina.sample'</span> % \
+        (__datadir__, coh, coh)
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.3" class="outline-3">
+<h3 id="sec-4.3"><span class="section-number-3">4.3</span> Restricted genofile </h3>
+<div class="outline-text-3" id="text-4.3">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">restricted_genofile</span>(coh, snpfile):
+    <span style="color: #afeeee; font-weight: bold;">return</span> coh + <span style="color: #87cefa;">'-'</span> + os.path.basename(snpfile)
+
+</pre>
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.4" class="outline-3">
+<h3 id="sec-4.4"><span class="section-number-3">4.4</span> Exclude dir </h3>
+<div class="outline-text-3" id="text-4.4">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">exclude_dir</span>(coh):
+    <span style="color: #afeeee; font-weight: bold;">return</span> <span style="color: #87cefa;">'%s/%s/illumina/exclusions'</span> % (__datadir__, coh)
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.5" class="outline-3">
+<h3 id="sec-4.5"><span class="section-number-3">4.5</span> Excluded genofile </h3>
+<div class="outline-text-3" id="text-4.5">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">excluded_genofile</span>(coh, snpfile):
+    <span style="color: #afeeee; font-weight: bold;">return</span> coh + <span style="color: #87cefa;">'x-'</span> + os.path.basename(snpfile)
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.6" class="outline-3">
+<h3 id="sec-4.6"><span class="section-number-3">4.6</span> Popen </h3>
+<div class="outline-text-3" id="text-4.6">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">Popen</span>(cmd, shell=<span style="color: #afeeee; font-weight: bold;">False</span>, stdout=<span style="color: #98fb98;">None</span>):
+    <span style="color: #afeeee; font-weight: bold;">print</span>(<span style="color: #87cefa;">' '</span>.join(cmd) + (<span style="color: #87cefa;">' &gt; '</span> + stdout.name <span style="color: #afeeee; font-weight: bold;">if</span> stdout <span style="color: #afeeee; font-weight: bold;">else</span> <span style="color: #87cefa;">''</span>))
+    <span style="color: #afeeee; font-weight: bold;">if</span> pca.options.dry_run:
+        <span style="color: #afeeee; font-weight: bold;">return</span> subprocess.Popen(<span style="color: #87cefa;">''</span>, shell=<span style="color: #afeeee; font-weight: bold;">True</span>)
+    <span style="color: #afeeee; font-weight: bold;">else</span>:
+        <span style="color: #afeeee; font-weight: bold;">return</span> subprocess.Popen(cmd, shell=shell, stdout=stdout)
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.7" class="outline-3">
+<h3 id="sec-4.7"><span class="section-number-3">4.7</span> System </h3>
+<div class="outline-text-3" id="text-4.7">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">def</span> <span style="color: #7fffd4; font-weight: bold;">system</span>(cmd):
+    <span style="color: #afeeee; font-weight: bold;">print</span>(cmd)
+    os.system(cmd)
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.8" class="outline-3">
+<h3 id="sec-4.8"><span class="section-number-3">4.8</span> Flatten </h3>
+<div class="outline-text-3" id="text-4.8">
+
+
+
+
+<pre class="src src-python"><span style="color: #40e0d0; font-weight: bold;">flatten</span> = <span style="color: #afeeee; font-weight: bold;">lambda</span>(lizt): <span style="color: #7fffd4;">sum</span>(lizt, [])
+
+</pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4.9" class="outline-3">
+<h3 id="sec-4.9"><span class="section-number-3">4.9</span> Run from command line </h3>
+<div class="outline-text-3" id="text-4.9">
+
+
+
+
+<pre class="src src-python"><span style="color: #afeeee; font-weight: bold;">if</span> <span style="color: #7fffd4;">__name__</span> == <span style="color: #87cefa;">'__main__'</span>:
+      pca = PCA()
+      <span style="color: #add8e6;"># pca.options, main_args = pca.option_parser.parse_args()      
+</span>      pca.run()
+
+</pre>
+
+
+
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Org config </h2>
+<div class="outline-text-2" id="text-5">
+
+<p>;; Local Variables: **
+;; org-babel-default-header-args: ((:tangle . "wtccc2-pca.py")) **
+;; org-src-preserve-indentation: t **
+;; End: **
+</p></div>
+</div>
+<div id="postamble">
+<p class="author"> Author: Dan Davison
+<a href="mailto:davison@stats.ox.ac.uk">&lt;davison@stats.ox.ac.uk&gt;</a>
+</p>
+<p class="date"> Date: 2009-10-12 17:02:30 EDT</p>
+<p class="creator">HTML generated by org-mode 6.31trans in emacs 23</p>
+</div>
+</div>
+</body>
+</html>

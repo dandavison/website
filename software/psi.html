@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>Population structure inference</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2008-09-05 18:10:47 BST"/>
+<meta name="author" content="Dan"/>
+<style type="text/css">
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+</style><link rel=stylesheet
+                       href="style.css"
+                       type="text/css">
+</head><body>
+<h1 class="title">Population structure inference</h1>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">psi: parallel structure inference [contact me if you want to use this]</h2>
+<div id="text-1">
+
+<p>This software fits the 'admixture model' described by Pritchard et
+al. (2000) Genetics (2):945-959, to SNP genotype data. The model
+may be fitted using either MCMC (as described by the original
+authors), or the EM algorithm. The EM fit may be carried out in
+parallel on a compute cluster with some version of MPI
+installed. In that case the speed-up is roughly linear in the
+number of processors allocated to the task.
+</p></div>
+</div>
+</body>
+</html>
